@@ -1,0 +1,60 @@
+import random
+from matplotlib.patches import Circle,Rectangle
+def draw_monte_carlo(Ntotal):
+    ### Insert your code here
+    fig = plt.figure()
+    
+    ax1 = fig.add_subplot(121)
+    ax2 = fig.add_subplot(122)
+    ax1.set_xlim(-1,1)
+    ax1.set_ylim(-1,1)
+    ax1.set_aspect('equal')
+    ax2.set_xlim(-1,1)
+    ax2.set_ylim(-1,1)
+    ax2.set_aspect('equal')
+    
+    fig.subplots_adjust(wspace = 0.5)
+
+    rect1 = Rectangle((-1,-1), 2, 2, facecolor = 'red')
+    circle1 = Circle((0,0), radius = 1, color = 'green')
+    ax1.add_patch(rect1)
+    ax1.add_patch(circle1)
+    
+    points = np.random.uniform(-1, 1, size = (Ntotal, 2))
+    inside_points_x = []
+    inside_points_y = []
+    outside_points_x = []
+    outside_points_y = []
+    
+    for x, y in points:
+        if x**2 + y**2 <= 1:
+            inside_points_x.append(x)
+            inside_points_y.append(y)
+        
+        if x**2 + y**2 > 1:
+            outside_points_x.append(x)
+            outside_points_y.append(y)
+    
+    ax2.scatter(inside_points_x, inside_points_y, color = 'green')
+    ax2.scatter(outside_points_x, outside_points_y, color = 'red')
+    
+    
+    rect2 = Rectangle((-1,-1), 2, 2, fill = False)
+    circle2 = Circle((0,0), radius = 1, fill = False, edgecolor = 'blue')
+    ax2.add_patch(rect2)
+    ax2.add_patch(circle2)
+    
+    
+    ax1.set_xlabel('x')
+    ax1.set_ylabel('y')
+    ax2.set_xlabel('x')
+    ax2.set_ylabel('y')
+    
+    plt.title('Monte Carlo Approximation to π', x = -0.275, y = 1.1)
+    plt.show()
+    fig.savefig('outputimage.png')
+    
+    
+# Call the plotting function
+draw_monte_carlo(250)
+
