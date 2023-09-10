@@ -1,0 +1,47 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from arch import arch_model
+from datetime import datetime, timedelta
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+import yfinance as yf
+
+start = datetime(2018, 1, 1)
+end = datetime(2023, 1, 1)
+
+data = yf.download('TSLA', start, end)
+returns = 100 * data.Close.pct_change().dropna()
+
+plt.figure(figsize = (10, 5))
+plt.plot(returns)
+plt.ylabel('Returns')
+plt.xlabel('Year')
+plt.show()
+
+plot_pacf(returns**2)
+plt.ylim([-0.5, 1.5])
+plt.show()
+
+model = arch_model(returns, p = 3, q = 3)
+model_fit = model.fit()
+model_fit.summary()
+
+from arch.__future__ import reindexing
+predictions = []
+data_size = 365
+
+for i in range(data_size):
+    train = returns[:-(data_size - i)]
+    models = arch_model(train, p = 3, q = 3)
+    models_fit = models.fit(disp = 'off')
+    pred = models_fit.forecast(horizon = 7)
+    predictions.append(np.sqrt(pred.variance.values[-1,:][0]))
+
+predictions = pd.Series(predictions, index=returns.index[-365:])
+
+plt.figure(figsize=(10,5))
+true, = plt.plot(returns[-365:])
+preds, = plt.plot(predictions)
+plt.title('Volatility Prediction - Rolling Forecast', fontsize=20)
+plt.legend(['True Returns', 'Predicted Volatility'], fontsize=16)
+plt.show()
